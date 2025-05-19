@@ -17,7 +17,7 @@ export default new Component({
                 <b><span id="metrics-char-w-val">0см</span></b>
             </p>
             <p class="metrics__char-h">
-                Средняя ширина высота символов:
+                Средняя высота символов:
                 <b><span id="metrics-char-h-val">0см</span></b>
             </p>
         </div>

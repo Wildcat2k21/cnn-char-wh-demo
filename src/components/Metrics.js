@@ -12,14 +12,7 @@ export default new Component({
     html: /*html*/`
         <div class="metrics">
             <h3 class="metrics__header">Метрики текста изображения</h3>
-            <p class="metrics__char-w">
-                Средняя ширина символов:
-                <b><span id="metrics-char-w-val">0см</span></b>
-            </p>
-            <p class="metrics__char-h">
-                Средняя высота символов:
-                <b><span id="metrics-char-h-val">0см</span></b>
-            </p>
+            <p class="metrics__text"></p>
         </div>
     `,
     callback: (elem) => {
@@ -27,12 +20,12 @@ export default new Component({
         // Добавляем метод для отображения метрик как глобальный объект
         // Для передачи между компонентами
        window.displayCharMetrics = async (tensor) => {
-            const $charWidthSpan = elem.querySelector("#metrics-char-h-val");
-            const $charHeoghtSpan = elem.querySelector("#metrics-char-w-val");
-;
+            const $metricsText = elem.querySelector(".metrics__text");
+
             if (!tensor) return console.warn("Тензор изображения не найден");
 
-            const model = await tf.loadLayersModel('/ai-models/charWH/model.json');
+            // Используем модель классификатора
+            const model = await tf.loadLayersModel('/ai-models/classifier/model.json');
             const batched = tensor.expandDims(0);
 
             // Используем tidy только для синхронных операций
@@ -45,12 +38,44 @@ export default new Component({
 
             tf.dispose(batched);
 
-            const [charW, charH] = data;
-            const charWcm = (charW * 16 / 100).toFixed(2);
-            const charHcm = (charH * 20.5 / 100).toFixed(2);
+            const [
+                correctImage,
+                shortText, 
+                badZoom,
+                badOrient,
+                badAngle,
+                forceBlur,
+                glimmer
+            ] = data.map(clsVal => Math.round(clsVal));
 
-            $charWidthSpan.textContent = `${charWcm}см`;
-            $charHeoghtSpan.textContent = `${charHcm}см`;
+            if(correctImage) {
+                $metricsText.textContent = "Изображение соответствует категории 1 - пригодно для анализа";
+                return;
+            }
+            else if(shortText) {
+                $metricsText.textContent = "Изображение соответствует категории 2 - Мало текста для проведения анализа";
+                return;
+            }
+            else if(badZoom) {
+                $metricsText.textContent = "Изображение соответствует категории 3 - Плохой маштаб изображения для анализа";
+                return;
+            }
+            else if(badOrient) {
+                $metricsText.textContent = "Изображение соответствует категории 4 - Необходим поворот изображения";
+                return;
+            }
+            else if(badAngle) {
+                $metricsText.textContent = "Изображение соответствует категории 5 - Слишком большой угол поворота";
+                return;
+            }
+            else if(forceBlur) {
+                $metricsText.textContent = "Изображение соответствует категории 6 - Изображение сильно размыто";
+                return;
+            }
+            else if(glimmer) {
+                $metricsText.textContent = "Изображение соответствует категории 7 - Тусклое изображение";
+                return;
+            }
         };
 
     }

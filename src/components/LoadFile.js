@@ -12,13 +12,13 @@ export default Component({
         </button>
       </div>
       <img id="preview" style="max-width: 300px; margin-top: 10px;" />
-      <img id="preview-converted" style="max-width: 300px; margin-top: 10px;" />
+      <!-- <img id="preview-converted" style="max-width: 300px; margin-top: 10px;" /> -->
     </div>
   `,
   callback: (elem) => {
     const $upload = elem.querySelector("#upload");
     const $preview = elem.querySelector("#preview");
-    const $converted = elem.querySelector("#preview-converted");
+    // const $converted = elem.querySelector("#preview-converted");
     const $customBtn = elem.querySelector('.upload__decorated-btn');
 
     $customBtn.addEventListener('click', () => $upload.click());
@@ -34,10 +34,10 @@ export default Component({
           let t = tf.browser.fromPixels($preview);   // [H,W,3]
           t = t.mean(2).expandDims(-1);              // [H,W,1]
           // Поворот на 90° CW:
-          t = t.transpose([1, 0, 2]);                // [W,H,1]
-          t = t.reverse(1);                          // [W,H,1] повернуто
+          // t = t.transpose([1, 0, 2]);                // [W,H,1]
+          // t = t.reverse(1);                          // [W,H,1] повернуто
           // Ресайз обратно на [200,266]
-          t = tf.image.resizeBilinear(t, [200, 266]); // [200,266,1]
+          t = tf.image.resizeBilinear(t, [200, 200]); // [200,266,1]
           // Нормализация
           return t.div(255);
         });
@@ -47,7 +47,7 @@ export default Component({
         canvas.width = 266;
         canvas.height = 200;
         await tf.browser.toPixels(tensor.squeeze(), canvas);
-        $converted.src = canvas.toDataURL();
+        // $converted.src = canvas.toDataURL();
 
         // Отображаем метрики
         window.displayCharMetrics(tensor);
